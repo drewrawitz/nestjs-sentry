@@ -66,8 +66,12 @@ export class SentryInterceptor implements NestInterceptor {
 
   private captureHttpException(scope: Scope, http: HttpArgumentsHost, exception: any): void {
     const data = Handlers.parseRequest(<any>{},http.getRequest(), {});
+    const dataRequest = data.request;
 
-    scope.setExtra('req', data.request);
+    delete dataRequest.cookies;
+    delete dataRequest.headers.cookie;
+
+    scope.setExtra('req', dataRequest);
 
     if (data.extra) scope.setExtras(data.extra);
 
