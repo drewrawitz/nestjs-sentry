@@ -5,7 +5,7 @@ import {
   Injectable,
   NestInterceptor
 } from '@nestjs/common';
-import { 
+import {
   HttpArgumentsHost,
   WsArgumentsHost,
   RpcArgumentsHost,
@@ -41,8 +41,8 @@ export class SentryInterceptor implements NestInterceptor {
             switch (context.getType<ContextType>()) {
               case 'http':
                 return this.captureHttpException(
-                  scope, 
-                  context.switchToHttp(), 
+                  scope,
+                  context.switchToHttp(),
                   exception
                 );
               case 'rpc':
@@ -68,9 +68,18 @@ export class SentryInterceptor implements NestInterceptor {
     const data = Handlers.parseRequest(<any>{},http.getRequest(), {});
 
     scope.setExtra('req', data.request);
-    
+
     if (data.extra) scope.setExtras(data.extra);
-    if (data.user) scope.setUser(data.user);
+
+    scope.setUser({
+      ...(data.user.userId && {
+        id: data.user.userId,
+      }),
+      ...(data.user.email && {
+        email: data.user.email,
+      }),
+      ip_address: '{{auto}}'
+    })
 
     this.client.instance().captureException(exception);
   }

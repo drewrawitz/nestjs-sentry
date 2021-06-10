@@ -39,8 +39,11 @@ let SentryInterceptor = class SentryInterceptor {
         scope.setExtra('req', data.request);
         if (data.extra)
             scope.setExtras(data.extra);
-        if (data.user)
-            scope.setUser(data.user);
+        scope.setUser(Object.assign(Object.assign(Object.assign({}, (data.user.userId && {
+            id: data.user.userId,
+        })), (data.user.email && {
+            email: data.user.email,
+        })), { ip_address: '{{auto}}' }));
         this.client.instance().captureException(exception);
     }
     captureRpcException(scope, rpc, exception) {
